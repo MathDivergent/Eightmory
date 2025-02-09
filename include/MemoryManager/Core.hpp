@@ -5,7 +5,7 @@
 
 struct segment_t
 {
-    std::size_t size  : sizeof(std::size_t) * 8 - 1;
+    std::size_t size : sizeof(std::size_t) * 8 - 1;
     std::size_t is_used : 1;
 
     void* memory();
