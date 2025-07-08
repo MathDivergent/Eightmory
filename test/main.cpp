@@ -2,7 +2,7 @@
 
 #include <new>
 
-#include <MemoryManager/Core.hpp>
+#include <MemoryManager.hpp>
 
 static constexpr auto xxmemory_bytes = 1000;
 static auto xxmemory = memory_manager_t(static_cast<char*>(std::malloc(xxmemory_bytes)), xxmemory_bytes);
