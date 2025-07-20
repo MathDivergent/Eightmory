@@ -1,14 +1,17 @@
-#include <MemoryManager.hpp>
+#include <Eightmory/Core.hpp>
 
 #include <cassert> // assert
 #include <new> // placement new
 
-void* segment_t::memory()
+namespace eightmory
+{
+
+void* segment_t::memory() noexcept
 {
     return reinterpret_cast<char*>(this) + sizeof(segment_t);
 }
 
-segment_t* segment_t::next()
+segment_t* segment_t::next() noexcept
 {
     return reinterpret_cast<segment_t*>
     (
@@ -16,7 +19,7 @@ segment_t* segment_t::next()
     );
 }
 
-segment_t* segment_t::segment(void* memory)
+segment_t* segment_t::segment(void* memory) noexcept
 {
     return reinterpret_cast<segment_t*>
     (
@@ -37,11 +40,26 @@ memory_manager_t::memory_manager_t(char* memory, std::size_t bytes)
 
 void* memory_manager_t::add_segment(std::size_t size)
 {
-    for (auto segment = begin(); segment != end(); segment = segment->next())
+    return add_segment(size, begin());
+}
+
+void* memory_manager_t::add_segment(std::size_t size, segment_t* hint)
+{
+    for (auto segment = hint; segment != end(); segment = segment->next())
     {
         if (segment->is_used)
         {
              continue;
+        }
+
+        if (segment->size < sizeof(segment_t) + size)
+        {
+            auto rhs = segment->next();
+            if (rhs != end() && !rhs->is_used)
+            {
+                segment->size += sizeof(segment_t) + rhs->size;
+                rhs->~segment_t();
+            }
         }
 
         if (segment->size >= sizeof(segment_t) + size)
@@ -109,15 +127,18 @@ bool memory_manager_t::extend_segment(void* address, std::size_t size)
 
 bool memory_manager_t::remove_segment(void* address)
 {
-    auto lhs = end();
-    for (auto segment = begin(); segment != end(); lhs = segment,
-                                                   segment = segment->next())
+    return remove_segment(address, begin());
+}
+
+bool memory_manager_t::remove_segment(void* address, segment_t* hint)
+{
+    for (auto segment = hint; segment != end(); segment = segment->next())
     {
         if (address != segment->memory())
         {
             continue;
         }
-        
+
         auto rhs = segment->next();
 
         segment->is_used = false;
@@ -126,13 +147,15 @@ bool memory_manager_t::remove_segment(void* address)
             segment->size += sizeof(segment_t) + rhs->size;
             rhs->~segment_t();
         }
-        if (lhs != end() && !lhs->is_used)
-        {
-            lhs->size += sizeof(segment_t) + segment->size;
-            segment->~segment_t();
-        }
 
         return true;
     }
     return false;
 }
+
+std::size_t memory_manager_t::bytes() const noexcept
+{
+    return reinterpret_cast<char*>(end()) - reinterpret_cast<char*>(begin());
+}
+
+} // namespace eightmory

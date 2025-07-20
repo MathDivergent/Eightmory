@@ -2,10 +2,11 @@
 
 #include <new>
 
-#include <MemoryManager.hpp>
+#include <EightmoryTestingBase.hpp>
+
 
 static constexpr auto xxmemory_bytes = 1000;
-static auto xxmemory = memory_manager_t(static_cast<char*>(std::malloc(xxmemory_bytes)), xxmemory_bytes);
+static auto xxmemory = eightmory::memory_manager_t(static_cast<char*>(std::malloc(xxmemory_bytes)), xxmemory_bytes);
 
 void stats(char const* text)
 {
@@ -18,6 +19,7 @@ void stats(char const* text)
     for (auto i = 0; i<border_length; ++i) std::cout << '-';
     std::cout << '\n';
 
+    #if 0
     for (auto segment = xxmemory.begin(); segment != xxmemory.end(); segment = segment->next())
     {
         std::cout << "segment: " << segment
@@ -26,6 +28,15 @@ void stats(char const* text)
                   << "\nis_used: " << segment->is_used
                   << "\n\n";
     }
+    #else
+    for (auto segment = xxmemory.begin(); segment != xxmemory.end(); segment = segment->next())
+    {
+        std::cout << (segment->is_used ? "[" : "(") << segment
+                  << "|" << segment->size
+                  << (segment->is_used ? "] " : ") ");
+    }
+    std::cout << '\n';
+    #endif // if
 
     for (auto i = 0; i<border_length; ++i) std::cout << '-';
     std::cout << '\n';
@@ -57,10 +68,12 @@ void operator delete[](void* pointer) noexcept
 }
 
 #define DO(...) __VA_ARGS__; stats(#__VA_ARGS__)
-#define DM(...) std::cout << #__VA_ARGS__ << ": " << static_cast<void*>(reinterpret_cast<char*>(__VA_ARGS__) - sizeof(segment_t)) << '\n'
+#define DM(...) std::cout << #__VA_ARGS__ << ": " << static_cast<void*>(reinterpret_cast<char*>(__VA_ARGS__) - sizeof(eightmory::segment_t)) << '\n'
 
-void simple_test()
+TEST(Eightmory, SimpleTest)
 {
+    EXPECT("memory.bytes", xxmemory.bytes() == xxmemory_bytes);
+
     //if (false)
     {
         DO((void)xxmemory);
@@ -84,17 +97,17 @@ void simple_test()
         if (false)
         {
             DO(xxmemory.extend_segment(segment08, 2));
-            DO(xxmemory.extend_segment(segment08, sizeof(segment_t)));
+            DO(xxmemory.extend_segment(segment08, sizeof(eightmory::segment_t)));
         }
         else if (true)
         {
 
-            DO(xxmemory.extend_segment(segment08, sizeof(segment_t)));
+            DO(xxmemory.extend_segment(segment08, sizeof(eightmory::segment_t)));
             DO(xxmemory.extend_segment(segment08, 2));
         }
         else
         {
-            DO(xxmemory.extend_segment(segment08, sizeof(segment_t) + 2));
+            DO(xxmemory.extend_segment(segment08, sizeof(eightmory::segment_t) + 2));
         }
         DO(xxmemory.extend_segment(segment02, 6));
         DO(xxmemory.remove_segment(segment08));
@@ -120,7 +133,7 @@ void simple_test()
 #include <string>
 #include <map>
 
-void stl_test()
+TEST(Eightmory, STLTest)
 {
     {
         std::string str;
@@ -140,13 +153,4 @@ void stl_test()
         DO(map.erase("Jully"));
     }
     DO((void)"~map");
-}
-
-
-int main()
-{
-    simple_test();
-    stl_test();
-
-    return 0;
 }
