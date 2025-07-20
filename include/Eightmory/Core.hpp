@@ -2,6 +2,7 @@
 #define EIGHTMORY_CORE_HPP
 
 #include <cstddef> // size_t
+#include <climits> // CHAR_BIT
 
 namespace eightmory
 {
@@ -9,7 +10,7 @@ namespace eightmory
 struct segment_t
 {
     // segment memory size
-    std::size_t size : sizeof(std::size_t) * 8 - 1;
+    std::size_t size : sizeof(std::size_t) * CHAR_BIT - 1;
 
     // segment is used mark
     // note: manual change is not safe
@@ -42,7 +43,6 @@ public:
     // try remove segment by segment memory address, search from xxbegin
     bool remove_segment(void* address);
     // try remove segment by segment memory address, search from hint
-    // note: lhs segment catch miss when segment memory address same as hint segment memory address
     bool remove_segment(void* address, segment_t* hint);
 
 public:
