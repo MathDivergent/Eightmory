@@ -25,11 +25,11 @@ struct segment_t
     static segment_t* segment(void* address) noexcept;
 };
 
-class memory_manager_t
+class segment_manager_t
 {
 public:
     // initialize memory manager on given buffer
-    memory_manager_t(void* memory, std::size_t bytes);
+    segment_manager_t(void* memory, std::size_t bytes);
 
 public:
     // allocate segment of given size, search from begin

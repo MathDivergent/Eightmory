@@ -27,7 +27,7 @@ segment_t* segment_t::segment(void* memory) noexcept
     );
 }
 
-memory_manager_t::memory_manager_t(void* memory, std::size_t bytes)
+segment_manager_t::segment_manager_t(void* memory, std::size_t bytes)
     : xxbegin(reinterpret_cast<segment_t*>(memory))
     , xxend(reinterpret_cast<segment_t*>(reinterpret_cast<char*>(memory) + bytes))
 {
@@ -38,12 +38,12 @@ memory_manager_t::memory_manager_t(void* memory, std::size_t bytes)
     segment->is_used = false;
 }
 
-void* memory_manager_t::add_segment(std::size_t size)
+void* segment_manager_t::add_segment(std::size_t size)
 {
     return add_segment(size, begin());
 }
 
-void* memory_manager_t::add_segment(std::size_t size, segment_t* hint)
+void* segment_manager_t::add_segment(std::size_t size, segment_t* hint)
 {
     for (auto segment = hint; segment != end(); segment = segment->next())
     {
@@ -92,7 +92,7 @@ void* memory_manager_t::add_segment(std::size_t size, segment_t* hint)
     return nullptr;
 }
 
-bool memory_manager_t::extend_segment(void* memory)
+bool segment_manager_t::extend_segment(void* memory)
 {
     auto segment = segment_t::segment(memory);
     auto const prev_size = segment->size;
@@ -112,7 +112,7 @@ bool memory_manager_t::extend_segment(void* memory)
     return segment->size > prev_size;
 }
 
-bool memory_manager_t::extend_segment(void* address, std::size_t size)
+bool segment_manager_t::extend_segment(void* address, std::size_t size)
 {
     auto segment = segment_t::segment(address);
     auto rhs = segment->next();
@@ -151,7 +151,7 @@ bool memory_manager_t::extend_segment(void* address, std::size_t size)
     }
 }
 
-void memory_manager_t::remove_segment(void* memory)
+void segment_manager_t::remove_segment(void* memory)
 {
 #ifdef EIGHTMORY_DEBUG
     for (auto segment = begin(); segment != end(); segment = segment->next())
@@ -169,7 +169,7 @@ void memory_manager_t::remove_segment(void* memory)
 #endif
 }
 
-std::size_t memory_manager_t::bytes() const noexcept
+std::size_t segment_manager_t::bytes() const noexcept
 {
     return reinterpret_cast<char*>(end()) - reinterpret_cast<char*>(begin());
 }

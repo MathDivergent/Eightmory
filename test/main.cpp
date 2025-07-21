@@ -6,7 +6,7 @@
 
 
 static constexpr auto xxmemory_bytes = 1000;
-static auto xxmemory = eightmory::memory_manager_t(static_cast<char*>(std::malloc(xxmemory_bytes)), xxmemory_bytes);
+static auto xxmemory = eightmory::segment_manager_t(static_cast<char*>(std::malloc(xxmemory_bytes)), xxmemory_bytes);
 
 void stats(char const* text)
 {
@@ -19,7 +19,7 @@ void stats(char const* text)
     for (auto i = 0; i<border_length; ++i) std::cout << '-';
     std::cout << '\n';
 
-    #if 1
+    #if 0
     for (auto segment = xxmemory.begin(); segment != xxmemory.end(); segment = segment->next())
     {
         std::cout << "segment: " << segment
