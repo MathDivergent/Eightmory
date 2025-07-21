@@ -19,7 +19,7 @@ void stats(char const* text)
     for (auto i = 0; i<border_length; ++i) std::cout << '-';
     std::cout << '\n';
 
-    #if 0
+    #if 1
     for (auto segment = xxmemory.begin(); segment != xxmemory.end(); segment = segment->next())
     {
         std::cout << "segment: " << segment
@@ -28,6 +28,7 @@ void stats(char const* text)
                   << "\nis_used: " << segment->is_used
                   << "\n\n";
     }
+    for (auto i = 0; i<border_length; ++i) std::cout << '-';
     #else
     for (auto segment = xxmemory.begin(); segment != xxmemory.end(); segment = segment->next())
     {
@@ -38,33 +39,32 @@ void stats(char const* text)
     std::cout << '\n';
     #endif // if
 
-    for (auto i = 0; i<border_length; ++i) std::cout << '-';
     std::cout << '\n';
 }
 
 void* operator new(std::size_t bytes)
 {
-    return xxmemory.add_segment(bytes); stats("void* operator new(std::size_t bytes)");
+    return xxmemory.add_segment(bytes); //stats("void* operator new(std::size_t bytes)");
 }
 
 void* operator new[](std::size_t bytes)
 {
-    return xxmemory.add_segment(bytes); stats("void* operator new[](std::size_t bytes)");
+    return xxmemory.add_segment(bytes); //stats("void* operator new[](std::size_t bytes)");
 }
 
 void operator delete(void* pointer) noexcept
 {
-    xxmemory.remove_segment(pointer); stats("void operator delete(void* pointer) noexcept");
+    xxmemory.remove_segment(pointer); //stats("void operator delete(void* pointer) noexcept");
 }
 
 void operator delete(void* pointer, std::size_t bytes) noexcept
 {
-    xxmemory.remove_segment(pointer); stats("void operator delete(void* pointer, std::size_t bytes) noexcept");
+    xxmemory.remove_segment(pointer); //stats("void operator delete(void* pointer, std::size_t bytes) noexcept");
 }
 
 void operator delete[](void* pointer) noexcept
 {
-    xxmemory.remove_segment(pointer); stats("void operator delete[](void* pointer) noexcept");
+    xxmemory.remove_segment(pointer); //stats("void operator delete[](void* pointer) noexcept");
 }
 
 #define DO(...) __VA_ARGS__; stats(#__VA_ARGS__)

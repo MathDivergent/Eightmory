@@ -27,11 +27,11 @@ segment_t* segment_t::segment(void* memory) noexcept
     );
 }
 
-memory_manager_t::memory_manager_t(char* memory, std::size_t bytes)
+memory_manager_t::memory_manager_t(void* memory, std::size_t bytes)
     : xxbegin(reinterpret_cast<segment_t*>(memory))
-    , xxend(reinterpret_cast<segment_t*>(memory + bytes))
+    , xxend(reinterpret_cast<segment_t*>(reinterpret_cast<char*>(memory) + bytes))
 {
-    assert(bytes > sizeof(segment_t));
+    assert(bytes > sizeof(segment_t) && "buffer size must be greater than sizeof(segment_t)");
 
     auto segment = new (begin()) segment_t;
     segment->size = bytes - sizeof(segment_t);
@@ -52,13 +52,17 @@ void* memory_manager_t::add_segment(std::size_t size, segment_t* hint)
              continue;
         }
 
-        if (segment->size < sizeof(segment_t) + size)
+        while (segment->size < sizeof(segment_t) + size)
         {
             auto rhs = segment->next();
             if (rhs != end() && !rhs->is_used)
             {
                 segment->size += sizeof(segment_t) + rhs->size;
                 rhs->~segment_t();
+            }
+            else
+            {
+                break;
             }
         }
 
@@ -88,6 +92,26 @@ void* memory_manager_t::add_segment(std::size_t size, segment_t* hint)
     return nullptr;
 }
 
+bool memory_manager_t::extend_segment(void* memory)
+{
+    auto segment = segment_t::segment(memory);
+    auto const prev_size = segment->size;
+
+    while (true)
+    {
+        auto rhs = segment->next();
+        if (rhs == end() || rhs->is_used)
+        {
+            break;
+        }
+
+        segment->size += sizeof(segment_t) + rhs->size;
+        rhs->~segment_t();
+    }
+
+    return segment->size > prev_size;
+}
+
 bool memory_manager_t::extend_segment(void* address, std::size_t size)
 {
     auto segment = segment_t::segment(address);
@@ -98,13 +122,15 @@ bool memory_manager_t::extend_segment(void* address, std::size_t size)
         return false;
     }
 
+    extend_segment(rhs->memory());
+
     if (rhs->size >= size)
     {
         const auto diff = rhs->size - size;
 
         segment->size += size;
         rhs->~segment_t();
-        
+
         auto created = new (segment->next()) segment_t;
 
         created->size = diff;
@@ -125,32 +151,22 @@ bool memory_manager_t::extend_segment(void* address, std::size_t size)
     }
 }
 
-bool memory_manager_t::remove_segment(void* address)
+void memory_manager_t::remove_segment(void* memory)
 {
-    return remove_segment(address, begin());
-}
-
-bool memory_manager_t::remove_segment(void* address, segment_t* hint)
-{
-    for (auto segment = hint; segment != end(); segment = segment->next())
+#ifdef EIGHTMORY_DEBUG
+    for (auto segment = begin(); segment != end(); segment = segment->next())
     {
-        if (address != segment->memory())
+        if (memory == segment->memory())
         {
-            continue;
+            segment->is_used = false;
+            return;
         }
-
-        auto rhs = segment->next();
-
-        segment->is_used = false;
-        if (rhs != end() && !rhs->is_used)
-        {
-            segment->size += sizeof(segment_t) + rhs->size;
-            rhs->~segment_t();
-        }
-
-        return true;
     }
-    return false;
+    assert(false && "failed to find segment by memory address");
+#else
+    auto segment = segment_t::segment(memory);
+    segment->is_used = false;
+#endif
 }
 
 std::size_t memory_manager_t::bytes() const noexcept

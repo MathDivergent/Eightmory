@@ -9,47 +9,52 @@ namespace eightmory
 
 struct segment_t
 {
-    // segment memory size
+    // size of segment memory
     std::size_t size : sizeof(std::size_t) * CHAR_BIT - 1;
 
-    // segment is used mark
-    // note: manual change is not safe
+    // true if segment is in use
     std::size_t is_used : 1;
 
-    // return segment memory
+    // get pointer to segment memory
     void* memory() noexcept;
 
-    // return neighbour rhs segment
+    // get next (right-hand) segment
     segment_t* next() noexcept;
 
-    // convert segment memory address to segment
+    // get segment header from segment memory pointer
     static segment_t* segment(void* address) noexcept;
 };
 
 class memory_manager_t
 {
 public:
-    memory_manager_t(char* memory, std::size_t bytes);
+    // initialize memory manager on given buffer
+    memory_manager_t(void* memory, std::size_t bytes);
 
 public:
-    // return segment memory address, search from xxbegin
+    // allocate segment of given size, search from begin
     [[nodiscard]] void* add_segment(std::size_t size);
-    // return segment memory address, search from hint
+
+    // allocate segment of given size, search from hint
     [[nodiscard]] void* add_segment(std::size_t size, segment_t* hint);
 
-    // try extends current segment memory
-    bool extend_segment(void* address, std::size_t size);
+    // try to extend segment using available free rhs segments
+    bool extend_segment(void* memory);
 
-    // try remove segment by segment memory address, search from xxbegin
-    bool remove_segment(void* address);
-    // try remove segment by segment memory address, search from hint
-    bool remove_segment(void* address, segment_t* hint);
+    // try to extend segment by given extra size
+    bool extend_segment(void* memory, std::size_t size);
+
+    // mark segment as unused
+    void remove_segment(void* memory);
 
 public:
+    // first segment
     segment_t* begin() const noexcept { return xxbegin; }
+
+    // end marker (after last segment)
     segment_t* end() const noexcept { return xxend; }
 
-public:
+    // total managed bytes
     std::size_t bytes() const noexcept;
 
 private:

@@ -60,4 +60,6 @@ if(EIGHTMORY_BUILD_TEST_LIBS)
     target_link_libraries(EightmoryTests PUBLIC Eightmory Eightest)
     target_include_directories(EightmoryTests PRIVATE "${CMAKE_CURRENT_LIST_DIR}/test")
     set_target_properties(EightmoryTests PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "${EIGHTMORY_RPATH}")
+
+    target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_DEBUG")
 endif()
