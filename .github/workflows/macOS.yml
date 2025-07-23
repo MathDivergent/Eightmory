@@ -30,7 +30,7 @@ jobs:
         cmake -S . -B Intermediate -G Ninja \
           -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_BUILD_TYPE=Release \
-          -DEIGHTSER_BUILD_TEST_LIBS=ON
+          -DEIGHTMORY_BUILD_TEST_LIBS=ON
         cmake --build Intermediate --parallel
 
     - name: "Package and Upload project"
