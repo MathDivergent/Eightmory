@@ -45,7 +45,7 @@ public:
     // return 'true' if extended
     bool extend_segment(void* memory, std::size_t size);
 
-    // mark segment as unused
+    // mark segment is_used as 'false'
     void remove_segment(void* memory);
 
 public:
