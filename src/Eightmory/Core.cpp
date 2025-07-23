@@ -11,19 +11,19 @@ void* segment_t::memory() noexcept
     return reinterpret_cast<char*>(this) + sizeof(segment_t);
 }
 
-segment_t* segment_t::next() noexcept
-{
-    return reinterpret_cast<segment_t*>
-    (
-        reinterpret_cast<char*>(memory()) + size
-    );
-}
-
 segment_t* segment_t::segment(void* memory) noexcept
 {
     return reinterpret_cast<segment_t*>
     (
         reinterpret_cast<char*>(memory) - sizeof(segment_t)
+    );
+}
+
+segment_t* segment_t::next() noexcept
+{
+    return reinterpret_cast<segment_t*>
+    (
+        reinterpret_cast<char*>(memory()) + size
     );
 }
 
@@ -52,6 +52,7 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint)
              continue;
         }
 
+        // lazy defragmentation
         while (segment->size < sizeof(segment_t) + size)
         {
             auto rhs = segment->next();
@@ -112,9 +113,9 @@ bool segment_manager_t::extend_segment(void* memory)
     return segment->size > prev_size;
 }
 
-bool segment_manager_t::extend_segment(void* address, std::size_t size)
+bool segment_manager_t::extend_segment(void* memory, std::size_t size)
 {
-    auto segment = segment_t::segment(address);
+    auto segment = segment_t::segment(memory);
     auto rhs = segment->next();
 
     if (rhs == end() || rhs->is_used)
