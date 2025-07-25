@@ -79,8 +79,9 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint)
             created->size = diff - sizeof(segment_t);
             created->is_used = false;
         }
-        else if (segment->size == size)
+        else if (segment->size >= size)
         {
+            // segment->size in range [size; size + sizeof(segment_t))
             segment->is_used = true;
         }
         else
