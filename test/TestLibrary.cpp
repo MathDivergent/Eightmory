@@ -31,21 +31,50 @@ void segment_defragmentation(segment_manager_t& manager) noexcept
 
 } // TEST_SPACE
 
-TEST(TestLibrary, TestInit)
+TEST(TestLibrary, TestValidManager)
 {
-    // [8 + 24]
+    // [8 + 0]
     char memory[32];
-    auto manager = segment_manager_t(memory, sizeof(memory));
+    auto valid_manager = segment_manager_t(memory, sizeof(memory));
 
-    static const auto begin_segment_size = manager.bytes() - sizeof(segment_t);
+    static const auto begin_segment_size = valid_manager.bytes() - sizeof(segment_t);
 
 
-    ASSERT("manager.bytes", manager.bytes() == sizeof(memory));
-    ASSERT("manager.segment_count", segment_count(manager) == 1);
+    ASSERT("valid_manager.bytes", valid_manager.bytes() == sizeof(memory));
+    ASSERT("valid_manager.segment_count", segment_count(valid_manager) == 1);
 
-    auto begin_segment = manager.begin();
-    EXPECT("manager.begin_segment.size", begin_segment->size == begin_segment_size);
-    EXPECT("manager.begin_segment.is_used", begin_segment->is_used == false);
+    auto begin_segment = valid_manager.begin();
+    EXPECT("valid_manager.begin_segment.size", begin_segment->size == begin_segment_size);
+    EXPECT("valid_manager.begin_segment.is_used", begin_segment->is_used == false);
+}
+
+TEST(TestLibrary, TestMinimalSizeManager)
+{
+    // [8 + 0]
+    char memory[8];
+    auto minimal_size_manager = segment_manager_t(memory, sizeof(memory));
+
+    static const auto begin_segment_size = minimal_size_manager.bytes() - sizeof(segment_t);
+
+
+    ASSERT("minimal_size_manager.bytes", minimal_size_manager.bytes() == sizeof(memory));
+    ASSERT("minimal_size_manager.segment_count", segment_count(minimal_size_manager) == 1);
+
+    auto begin_segment = minimal_size_manager.begin();
+    EXPECT("minimal_size_manager.begin_segment.size", begin_segment->size == begin_segment_size);
+    EXPECT("minimal_size_manager.begin_segment.is_used", begin_segment->is_used == false);
+}
+
+TEST(TestL1ibrary, TestInvalidManager)
+{
+    // [7] same as [8 - 1]
+    char memory[7];
+    auto invalid_size_manager = segment_manager_t(memory, sizeof(memory));
+
+    ASSERT("invalid_size_manager.begin", invalid_size_manager.begin() == nullptr);
+    ASSERT("invalid_size_manager.end", invalid_size_manager.end() == nullptr);
+    ASSERT("invalid_size_manager.bytes", invalid_size_manager.bytes() == 0);
+    ASSERT("invalid_size_manager.segment_count", segment_count(invalid_size_manager) == 0);
 }
 
 TEST(TestLibrary, TestOverSizeSegment)

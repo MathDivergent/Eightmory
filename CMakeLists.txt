@@ -46,6 +46,7 @@ if(EIGHTMORY_BUILD_TEST_LIBS)
 endif()
 add_compile_options(-fno-rtti)
 
+
 # [[Tests]]
 if(EIGHTMORY_BUILD_TEST_LIBS)
     file(GLOB_RECURSE PROJECT_TEST_SOURCES "${CMAKE_CURRENT_LIST_DIR}/test/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/test/*.hpp")

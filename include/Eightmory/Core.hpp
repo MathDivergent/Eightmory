@@ -24,29 +24,30 @@ struct segment_t
 class segment_manager_t
 {
 public:
-    segment_manager_t(void* memory, std::size_t bytes);
+    segment_manager_t(void* memory, std::size_t bytes) noexcept;
 
 public:
     // allocate segment of given size
     // search from begin
     // return 'pointer to segment memory'
-    [[nodiscard]] void* add_segment(std::size_t size);
+    [[nodiscard]] void* add_segment(std::size_t size) noexcept;
 
     // allocate segment of given size
     // search from hint
     // return 'pointer to segment memory'
-    [[nodiscard]] void* add_segment(std::size_t size, segment_t* hint);
+    [[nodiscard]] void* add_segment(std::size_t size, segment_t* hint) noexcept;
 
     // try to extend segment using available free rhs segments
     // return 'true' if extened
-    bool extend_segment(void* memory);
+    bool extend_segment(void* memory) noexcept;
 
     // try to extend segment by given extra size
     // return 'true' if extended
-    bool extend_segment(void* memory, std::size_t size);
+    bool extend_segment(void* memory, std::size_t size) noexcept;
 
     // mark segment is_used as 'false'
-    void remove_segment(void* memory);
+	// return 'true' if removed
+    bool remove_segment(void* memory) noexcept;
 
 public:
     segment_t* begin() const noexcept { return xxbegin; }

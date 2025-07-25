@@ -1,6 +1,5 @@
 #include <Eightmory/Core.hpp>
 
-#include <cassert> // assert
 #include <new> // placement new
 
 namespace eightmory
@@ -27,23 +26,26 @@ segment_t* segment_t::next() noexcept
     );
 }
 
-segment_manager_t::segment_manager_t(void* memory, std::size_t bytes)
-    : xxbegin(reinterpret_cast<segment_t*>(memory))
-    , xxend(reinterpret_cast<segment_t*>(reinterpret_cast<char*>(memory) + bytes))
+segment_manager_t::segment_manager_t(void* memory, std::size_t bytes) noexcept
 {
-    assert(bytes > sizeof(segment_t) && "buffer size must be greater than sizeof(segment_t)");
+    // buffer size must be greater than sizeof(segment_t)
+    if (bytes >= sizeof(segment_t))
+    {
+        xxbegin = reinterpret_cast<segment_t*>(memory);
+        xxend = reinterpret_cast<segment_t*>(reinterpret_cast<char*>(memory) + bytes);
 
-    auto segment = new (begin()) segment_t;
-    segment->size = bytes - sizeof(segment_t);
-    segment->is_used = false;
+        auto segment = new (begin()) segment_t;
+        segment->size = bytes - sizeof(segment_t);
+        segment->is_used = false;
+    }
 }
 
-void* segment_manager_t::add_segment(std::size_t size)
+void* segment_manager_t::add_segment(std::size_t size) noexcept
 {
     return add_segment(size, begin());
 }
 
-void* segment_manager_t::add_segment(std::size_t size, segment_t* hint)
+void* segment_manager_t::add_segment(std::size_t size, segment_t* hint) noexcept
 {
     for (auto segment = hint; segment != end(); segment = segment->next())
     {
@@ -81,7 +83,7 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint)
         }
         else if (segment->size >= size)
         {
-            // segment->size in range [size; size + sizeof(segment_t))
+            // segment->size in range [size, size + sizeof(segment_t))
             segment->is_used = true;
         }
         else
@@ -94,7 +96,7 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint)
     return nullptr;
 }
 
-bool segment_manager_t::extend_segment(void* memory)
+bool segment_manager_t::extend_segment(void* memory) noexcept
 {
     auto segment = segment_t::segment(memory);
     auto const prev_size = segment->size;
@@ -114,7 +116,7 @@ bool segment_manager_t::extend_segment(void* memory)
     return segment->size > prev_size;
 }
 
-bool segment_manager_t::extend_segment(void* memory, std::size_t size)
+bool segment_manager_t::extend_segment(void* memory, std::size_t size) noexcept
 {
     auto segment = segment_t::segment(memory);
     auto rhs = segment->next();
@@ -153,7 +155,7 @@ bool segment_manager_t::extend_segment(void* memory, std::size_t size)
     }
 }
 
-void segment_manager_t::remove_segment(void* memory)
+bool segment_manager_t::remove_segment(void* memory) noexcept
 {
 #ifdef EIGHTMORY_DEBUG
     for (auto segment = begin(); segment != end(); segment = segment->next())
@@ -161,13 +163,16 @@ void segment_manager_t::remove_segment(void* memory)
         if (memory == segment->memory())
         {
             segment->is_used = false;
-            return;
+            return true;
         }
     }
-    assert(false && "failed to find segment by memory address");
+
+    // failed to find segment by memory address
+    return false;
 #else
     auto segment = segment_t::segment(memory);
     segment->is_used = false;
+    return true;
 #endif
 }
 
