@@ -7,7 +7,7 @@
 namespace eightmory
 {
 
-struct segment_t
+struct EIGHTMORY_API segment_t
 {
     std::size_t size : sizeof(std::size_t) * CHAR_BIT - 1;
     std::size_t is_used : 1;
@@ -23,7 +23,7 @@ struct segment_t
     segment_t* next() noexcept;
 };
 
-class segment_manager_t
+class EIGHTMORY_API segment_manager_t
 {
 public:
     segment_manager_t(void* memory, std::size_t bytes) noexcept;
