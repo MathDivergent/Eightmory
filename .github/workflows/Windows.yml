@@ -1,0 +1,50 @@
+name: Eightmory-Windows
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      Eightmory: ${{ github.workspace }}
+
+    steps:
+    - name: "Download project"
+      uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: "Setup Windows (Dev)"
+      run: |
+        choco install mingw -y
+        cmake --version
+        gcc --version
+        g++ --version
+
+    - name: "Regenerate and Rebuild project"
+      shell: cmd
+      run: |
+        cd %Eightmory%
+        rmdir /s /q Intermediate
+        cmake -S . -B Intermediate -G Ninja ^
+          -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ^
+          -DCMAKE_BUILD_TYPE=Release ^
+          -DEIGHTMORY_BUILD_TEST_LIBS=ON
+        cmake --build Intermediate --parallel
+
+    - name: "Package and Upload project"
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.workflow }}
+        path: |
+          ${{ env.Eightmory }}/Binaries
+
+    - name: "Test project"
+      shell: cmd
+      run: |
+        cd "%Eightmory%/Binaries"
+        EightestLauncher.exe
