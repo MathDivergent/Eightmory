@@ -25,7 +25,7 @@ jobs:
 
     - name: "Regenerate and Rebuild project"
       run: |
-        cd ${Eightmory}
+        cd "${Eightmory}"
         rm -rf Intermediate
         cmake -S . -B Intermediate -G Ninja \
           -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
@@ -42,5 +42,5 @@ jobs:
 
     - name: "Test project"
       run: |
-        cd "${Eightmory}/Binaries/EightestLauncher.app/Contents/MacOS"
+        cd "${Eightmory}/Binaries"
         ./EightestLauncher

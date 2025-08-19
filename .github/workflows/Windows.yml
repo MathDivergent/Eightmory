@@ -28,7 +28,7 @@ jobs:
     - name: "Regenerate and Rebuild project"
       shell: cmd
       run: |
-        cd %Eightmory%
+        cd "%Eightmory%"
         rmdir /s /q Intermediate
         cmake -S . -B Intermediate -G Ninja ^
           -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ^

@@ -27,7 +27,7 @@ jobs:
 
     - name: "Regenerate and Rebuild project"
       run: |
-        cd ${Eightmory}
+        cd "${Eightmory}"
         rm -rf Intermediate
         cmake -S . -B Intermediate -G Ninja \
           -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
