@@ -96,8 +96,26 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint) noexcept
     return nullptr;
 }
 
+static bool contains_memory(segment_t* begin, segment_t* end, void* memory)
+{
+    for (auto segment = begin; segment != end; segment = segment->next())
+    {
+        if (memory == segment->memory())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool segment_manager_t::extend_segment(void* memory) noexcept
 {
+#ifdef EIGHTMORY_DEBUG
+    if (!contains_memory(begin(), end(), memory))
+    {
+        return false;
+    }
+#endif // EIGHTMORY_DEBUG
     auto segment = segment_t::segment(memory);
     auto const prev_size = segment->size;
 
@@ -118,6 +136,12 @@ bool segment_manager_t::extend_segment(void* memory) noexcept
 
 bool segment_manager_t::extend_segment(void* memory, std::size_t size) noexcept
 {
+#ifdef EIGHTMORY_DEBUG
+    if (!contains_memory(begin(), end(), memory))
+    {
+        return false;
+    }
+#endif // EIGHTMORY_DEBUG
     auto segment = segment_t::segment(memory);
     auto rhs = segment->next();
 
@@ -159,22 +183,14 @@ bool segment_manager_t::extend_segment(void* memory, std::size_t size) noexcept
 bool segment_manager_t::remove_segment(void* memory) noexcept
 {
 #ifdef EIGHTMORY_DEBUG
-    for (auto segment = begin(); segment != end(); segment = segment->next())
+    if (!contains_memory(begin(), end(), memory))
     {
-        if (memory == segment->memory())
-        {
-            segment->is_used = false;
-            return true;
-        }
+        return false;
     }
-
-    // failed to find segment by memory address
-    return false;
-#else
+#endif // EIGHTMORY_DEBUG
     auto segment = segment_t::segment(memory);
     segment->is_used = false;
     return true;
-#endif
 }
 
 std::size_t segment_manager_t::bytes() const noexcept
