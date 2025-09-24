@@ -48,7 +48,7 @@ public:
     bool extend_segment(void* memory, std::size_t size) noexcept;
 
     // mark segment is_used as 'false'
-	// return 'true' if removed
+    // return 'true' if removed
     bool remove_segment(void* memory) noexcept;
 
 public:
