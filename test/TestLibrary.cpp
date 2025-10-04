@@ -6,9 +6,12 @@
 using eightmory::segment_t;
 using eightmory::segment_manager_t;
 
+using eightmory::align_up;
+using eightmory::is_aligned;
+
 using segment_trace_t = std::vector<std::pair<std::size_t, bool>>;
 
-static_assert(sizeof(segment_t) == 8, "Exactly 8 bytes per 'segment_t' are required for tests.");
+static_assert(sizeof(segment_t) == EIGHTMORY_SEGMENT_ALIGN, "Exactly 8 bytes per 'segment_t' are required for tests.");
 
 TEST_SPACE()
 {
@@ -1419,4 +1422,24 @@ TEST(TestLibrary, TestComplexWithoutDefragmentation)
     EXPECT("manager.begin_segment.is_used", begin_segment->is_used == false);
 
     EXPECT("manager.trace.four_size_segment", segment_trace(manager) == segment_trace_t{{1, false}, {2, false}, {4, false}, {1, false}});
+}
+
+TEST(TestLibrary, TestAlign)
+{
+    EXPECT("align_up.common0", align_up(0, 1) == 0 && align_up(0, 8) == 0 && align_up(1, 1) == 1 && align_up(1, 8) == 8 && align_up(8, 8) == 8 && align_up(9, 8) == 16);
+    EXPECT("align_up.common1", align_up(13, 4) == 16 && align_up(15, 8) == 16 && align_up(17, 16) == 32 && align_up(63, 64) == 64 && align_up(65, 64) == 128);
+
+    bool success = true;
+    for (auto align : {1, 2, 4, 8, 16, 32, 64})
+    {
+        for (auto size = 0; size < 100; ++size)
+        {
+            auto aligned_size = align_up(size, align);
+            success &= is_aligned(aligned_size, align) && (aligned_size >= size) && (aligned_size - size < align);
+        }
+    }
+    EXPECT("align_up.hard", success == true);
+
+    EXPECT("align_up.big", align_up(1023, 256) == 1024 && align_up(4097, 4096) == 8192);
+    EXPECT("align_up.already-aligned", align_up(128, 64) == 128);
 }

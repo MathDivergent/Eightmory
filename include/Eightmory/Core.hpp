@@ -7,7 +7,7 @@
 namespace eightmory
 {
 
-struct EIGHTMORY_API segment_t
+struct EIGHTMORY_API alignas(EIGHTMORY_SEGMENT_ALIGN) segment_t
 {
     std::size_t size : sizeof(std::size_t) * CHAR_BIT - 1;
     std::size_t is_used : 1;
@@ -60,6 +60,17 @@ private:
     segment_t* xxbegin = nullptr;
     segment_t* xxend = nullptr;
 };
+
+// align must be power of two
+constexpr std::size_t align_up(std::size_t size, std::size_t align = EIGHTMORY_SEGMENT_ALIGN) noexcept
+{
+    return ~(align - 1) & (align - 1 + size);
+}
+
+constexpr bool is_aligned(std::size_t size, std::size_t align = EIGHTMORY_SEGMENT_ALIGN) noexcept
+{
+    return ((align - 1) & size) == 0;
+}
 
 } // namespace eightmory
 
