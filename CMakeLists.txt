@@ -55,6 +55,11 @@ else()
     target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_API=")
 endif()
 
+if(NOT EIGHTMORY_SEGMENT_ALIGN)
+    set(EIGHTMORY_SEGMENT_ALIGN "sizeof(std::size_t)")
+endif()
+
+target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_SEGMENT_ALIGN=${EIGHTMORY_SEGMENT_ALIGN}")
 
 # [[Tests]]
 if(EIGHTMORY_BUILD_TEST_LIBS)
