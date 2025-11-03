@@ -45,6 +45,21 @@ void* segment_manager_t::add_segment(std::size_t size) noexcept
     return add_segment(size, begin());
 }
 
+static bool extend_segment_with_rhs(segment_t* end, segment_t* segment) noexcept
+{
+    auto rhs = segment->next();
+    if (rhs == end || rhs->is_used)
+    {
+        return false;
+    }
+    else
+    {
+        segment->size += sizeof(segment_t) + rhs->size;
+        rhs->~segment_t();
+        return true;
+    }
+}
+
 void* segment_manager_t::add_segment(std::size_t size, segment_t* hint) noexcept
 {
     for (auto segment = hint; segment != end(); segment = segment->next())
@@ -55,19 +70,10 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint) noexcept
         }
 
         // lazy defragmentation
-        while (segment->size < size)
-        {
-            auto rhs = segment->next();
-            if (rhs != end() && !rhs->is_used)
-            {
-                segment->size += sizeof(segment_t) + rhs->size;
-                rhs->~segment_t();
-            }
-            else
-            {
-                break;
-            }
-        }
+        while
+        (
+            segment->size < size && extend_segment_with_rhs(end(), segment)
+        );
 
         if (segment->size >= sizeof(segment_t) + size)
         {
@@ -96,7 +102,7 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint) noexcept
     return nullptr;
 }
 
-static bool contains_memory(segment_t* begin, segment_t* end, void* memory)
+static bool contains_memory(segment_t* begin, segment_t* end, void* memory) noexcept
 {
     for (auto segment = begin; segment != end; segment = segment->next())
     {
@@ -119,17 +125,10 @@ bool segment_manager_t::extend_segment(void* memory) noexcept
     auto segment = segment_t::segment(memory);
     auto const prev_size = segment->size;
 
-    while (true)
-    {
-        auto rhs = segment->next();
-        if (rhs == end() || rhs->is_used)
-        {
-            break;
-        }
-
-        segment->size += sizeof(segment_t) + rhs->size;
-        rhs->~segment_t();
-    }
+    while
+    (
+        extend_segment_with_rhs(end(), segment)
+    );
 
     return segment->size > prev_size;
 }
@@ -150,7 +149,10 @@ bool segment_manager_t::extend_segment(void* memory, std::size_t size) noexcept
         return false;
     }
 
-    extend_segment(rhs->memory());
+    while
+    (
+        rhs->size < size && extend_segment_with_rhs(end(), rhs)
+    );
 
     if (rhs->size >= size)
     {
