@@ -33,6 +33,18 @@ if(LINUX OR APPLE)
 endif()
 
 
+# [[Launcher][Defaults]]
+if(PROJECT_IS_TOP_LEVEL AND EIGHTMORY_BUILD_TEST_LIBS)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Binaries")
+
+    if(WIN32 OR LINUX)
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Binaries")
+    elseif(APPLE)
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Frameworks")
+    endif()
+endif()
+
+
 # [[Module][Binaries]]
 file(GLOB_RECURSE PROJECT_SOURCES_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 add_library(Eightmory ${PROJECT_LIBS_TYPE} ${PROJECT_SOURCES_FILES})
@@ -44,7 +56,7 @@ if(EIGHTMORY_BUILD_SHARED_LIBS)
     target_compile_definitions(Eightmory PRIVATE "EIGHTMORY_API=${EIGHTMORY_MODULE_EXPORT}" INTERFACE "EIGHTMORY_API=${EIGHTMORY_MODULE_IMPORT}")
 
     if(LINUX OR APPLE)
-        # set_target_properties(Eightmory PROPERTIES ${EIGHTMORY_VISIBILITY_HIDDEN}) # TODO: check and fix
+        set_target_properties(Eightmory PROPERTIES ${EIGHTMORY_VISIBILITY_HIDDEN})
     endif()
 else()
     target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_API=")
@@ -84,18 +96,6 @@ if(EIGHTMORY_BUILD_TEST_LIBS)
     endif()
 
     target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_DEBUG")
-endif()
-
-
-# [[Launcher][Defaults]]
-if(PROJECT_IS_TOP_LEVEL AND EIGHTMORY_BUILD_TEST_LIBS)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Binaries")
-
-    if(WIN32 OR LINUX)
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Binaries")
-    elseif(APPLE)
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Frameworks")
-    endif()
 endif()
 
 
