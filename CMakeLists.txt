@@ -44,7 +44,7 @@ if(EIGHTMORY_BUILD_SHARED_LIBS)
     target_compile_definitions(Eightmory PRIVATE "EIGHTMORY_API=${EIGHTMORY_MODULE_EXPORT}" INTERFACE "EIGHTMORY_API=${EIGHTMORY_MODULE_IMPORT}")
 
     if(LINUX OR APPLE)
-        set_target_properties(Eightmory PROPERTIES ${EIGHTMORY_VISIBILITY_HIDDEN})
+        # set_target_properties(Eightmory PROPERTIES ${EIGHTMORY_VISIBILITY_HIDDEN}) # TODO: check and fix
     endif()
 else()
     target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_API=")
