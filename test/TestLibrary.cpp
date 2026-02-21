@@ -37,7 +37,7 @@ void segment_defragmentation(segment_manager_t& manager) noexcept
     }
 }
 
-segment_t* get_segment(segment_manager_t& manager, std::size_t index) noexcept
+[[maybe_unused]] segment_t* get_segment(segment_manager_t& manager, std::size_t index) noexcept
 {
     auto curr_index = std::size_t(0);
     for (auto segment = manager.begin(); segment != manager.end(); segment = segment->next())
@@ -1430,9 +1430,9 @@ TEST(TestLibrary, TestAlign)
     EXPECT("align_up.common1", align_up(13, 4) == 16 && align_up(15, 8) == 16 && align_up(17, 16) == 32 && align_up(63, 64) == 64 && align_up(65, 64) == 128);
 
     bool success = true;
-    for (auto align : {1, 2, 4, 8, 16, 32, 64})
+    for (const std::size_t align : {1, 2, 4, 8, 16, 32, 64})
     {
-        for (auto size = 0; size < 100; ++size)
+        for (std::size_t size = 0; size < 100; ++size)
         {
             auto aligned_size = align_up(size, align);
             success &= is_aligned(aligned_size, align) && (aligned_size >= size) && (aligned_size - size < align);
