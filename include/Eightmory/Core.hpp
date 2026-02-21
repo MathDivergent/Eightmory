@@ -7,7 +7,7 @@
 namespace eightmory
 {
 
-struct EIGHTMORY_API alignas(EIGHTMORY_SEGMENT_ALIGN) segment_t
+struct alignas(EIGHTMORY_SEGMENT_ALIGN) EIGHTMORY_API segment_t
 {
     std::size_t size : sizeof(std::size_t) * CHAR_BIT - 1;
     std::size_t is_used : 1;
