@@ -39,7 +39,7 @@ jobs:
         name: ${{ github.workflow }}
         path: |
           ${{ env.Eightmory }}/Binaries
-          ${{ env.Eightser }}/Frameworks
+          ${{ env.Eightmory }}/Frameworks
 
     - name: "Test project"
       run: |
