@@ -6,12 +6,13 @@ project(Eightmory)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
 
 
 # [[Module][Options]]
+option(EIGHTMORY_DEBUG "Build with diagnostic extentions by Default" OFF)
 option(EIGHTMORY_BUILD_SHARED_LIBS "Build shared libraies by Default" ON)
 option(EIGHTMORY_BUILD_TEST_LIBS "Build testing libraies by Default" OFF)
+option(EIGHTMORY_WARNING_FLAGS_ENABLE "Build with warning checking by Default" ON)
 
 
 # [[Module][Defaults]]
@@ -31,6 +32,10 @@ endif()
 
 if(LINUX OR APPLE)
     set(EIGHTMORY_VISIBILITY_HIDDEN C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+endif()
+
+if(EIGHTMORY_WARNING_FLAGS_ENABLE)
+    set(EIGHTMORY_WARNING_FLAGS "-Wall" "-Wextra" "-Wpedantic" "-Werror")
 endif()
 
 
@@ -53,6 +58,10 @@ target_include_directories(Eightmory PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include
 
 
 # [[Module][Configurations]]
+if(EIGHTMORY_DEBUG)
+    target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_DEBUG")
+endif()
+
 if(EIGHTMORY_BUILD_SHARED_LIBS)
     target_compile_definitions(Eightmory PRIVATE "EIGHTMORY_API=${EIGHTMORY_MODULE_EXPORT}" INTERFACE "EIGHTMORY_API=${EIGHTMORY_MODULE_IMPORT}")
 
@@ -64,10 +73,14 @@ else()
 endif()
 
 if(NOT EIGHTMORY_SEGMENT_ALIGN)
-    set(EIGHTMORY_SEGMENT_ALIGN "sizeof(std::size_t)")
+    set(EIGHTMORY_SEGMENT_ALIGN "8")
 endif()
 
 target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_SEGMENT_ALIGN=${EIGHTMORY_SEGMENT_ALIGN}")
+
+if(EIGHTMORY_WARNING_FLAGS)
+    target_compile_options(Eightmory PRIVATE ${EIGHTMORY_WARNING_FLAGS})
+endif()
 
 
 # [[Tests][Defaults]]
@@ -96,7 +109,9 @@ if(EIGHTMORY_BUILD_TEST_LIBS)
         set_target_properties(EightmoryTests PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "${EIGHTMORY_RPATH}" ${EIGHTMORY_VISIBILITY_HIDDEN})
     endif()
 
-    target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_DEBUG")
+    if(EIGHTMORY_WARNING_FLAGS)
+        target_compile_options(EightmoryTests PRIVATE ${EIGHTMORY_WARNING_FLAGS})
+    endif()
 endif()
 
 
