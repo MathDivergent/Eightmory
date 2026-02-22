@@ -102,7 +102,7 @@ void* segment_manager_t::add_segment(std::size_t size, segment_t* hint) noexcept
     return nullptr;
 }
 
-static bool contains_memory(segment_t* begin, segment_t* end, void* memory) noexcept
+[[maybe_unused]] static bool contains_memory(segment_t* begin, segment_t* end, void* memory) noexcept
 {
     for (auto segment = begin; segment != end; segment = segment->next())
     {

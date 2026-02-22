@@ -33,6 +33,7 @@ jobs:
         cmake -S . -B Intermediate -G Ninja ^
           -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ^
           -DCMAKE_BUILD_TYPE=Release ^
+          -DEIGHTMORY_DEBUG=ON ^
           -DEIGHTMORY_BUILD_TEST_LIBS=ON
         cmake --build Intermediate --parallel
 
