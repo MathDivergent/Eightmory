@@ -34,9 +34,7 @@ if(LINUX OR APPLE)
     set(EIGHTMORY_VISIBILITY_HIDDEN C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 endif()
 
-if(EIGHTMORY_WARNING_FLAGS_ENABLE)
-    set(EIGHTMORY_WARNING_FLAGS "-Wall" "-Wextra" "-Wpedantic" "-Werror")
-endif()
+set(EIGHTMORY_WARNING_FLAGS "-Wall" "-Wextra" "-Wpedantic" "-Werror")
 
 
 # [[Launcher][Defaults]]
@@ -72,13 +70,7 @@ else()
     target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_API=")
 endif()
 
-if(NOT EIGHTMORY_SEGMENT_ALIGN)
-    set(EIGHTMORY_SEGMENT_ALIGN "8")
-endif()
-
-target_compile_definitions(Eightmory PUBLIC "EIGHTMORY_SEGMENT_ALIGN=${EIGHTMORY_SEGMENT_ALIGN}")
-
-if(EIGHTMORY_WARNING_FLAGS)
+if(EIGHTMORY_WARNING_FLAGS_ENABLE)
     target_compile_options(Eightmory PRIVATE ${EIGHTMORY_WARNING_FLAGS})
 endif()
 
@@ -109,7 +101,7 @@ if(EIGHTMORY_BUILD_TEST_LIBS)
         set_target_properties(EightmoryTests PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "${EIGHTMORY_RPATH}" ${EIGHTMORY_VISIBILITY_HIDDEN})
     endif()
 
-    if(EIGHTMORY_WARNING_FLAGS)
+    if(EIGHTMORY_WARNING_FLAGS_ENABLE)
         target_compile_options(EightmoryTests PRIVATE ${EIGHTMORY_WARNING_FLAGS})
     endif()
 endif()
