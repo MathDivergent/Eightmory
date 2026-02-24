@@ -11,7 +11,7 @@ using eightmory::is_aligned;
 
 using segment_trace_t = std::vector<std::pair<std::size_t, bool>>;
 
-static_assert(sizeof(segment_t) == EIGHTMORY_SEGMENT_ALIGN, "Exactly 8 bytes per 'segment_t' are required for tests.");
+static_assert(sizeof(segment_t) == 8, "Exactly 8 bytes per 'segment_t' are required for tests.");
 
 TEST_SPACE()
 {
