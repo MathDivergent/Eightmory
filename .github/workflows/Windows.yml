@@ -7,7 +7,11 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        image: [windows-2022, windows-latest]
+
+    runs-on:  ${{ matrix.image }}
 
     env:
       Eightmory: ${{ github.workspace }}
@@ -40,7 +44,7 @@ jobs:
     - name: "Package and Upload project"
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.workflow }}
+        name: Eightmory-${{ matrix.image }}
         path: |
           ${{ env.Eightmory }}/Binaries
 
