@@ -9,7 +9,7 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 
 # [[Module][Options]]
-option(EIGHTMORY_DEBUG "Build with diagnostic extentions by Default" OFF)
+option(EIGHTMORY_DEBUG "Build with diagnostic extensions by Default" OFF)
 option(EIGHTMORY_BUILD_SHARED_LIBS "Build shared libraies by Default" ON)
 option(EIGHTMORY_BUILD_TEST_LIBS "Build testing libraies by Default" OFF)
 option(EIGHTMORY_WARNING_FLAGS_ENABLE "Build with warning checking by Default" ON)
